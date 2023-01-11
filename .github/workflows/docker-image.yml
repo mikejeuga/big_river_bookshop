@@ -1,0 +1,31 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag big-river-bookshop:$(date +%s)
+      
+
+    - name: Start Container
+      run: docker-compose -f docker-compose.yml up -d
+
+    - name: Run functional tests
+      run: make t
+
+    - name: Shut down container
+      run: docker-compose down
