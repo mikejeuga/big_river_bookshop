@@ -10,6 +10,7 @@ type Inventory interface {
 	Add(book models.Book) (uuid.UUID, error)
 	GetBookBy(id uuid.UUID) (models.Book, error)
 	Update(book models.Book) (models.Book, error)
+	Delete(book models.Book) error
 }
 
 type BookShopSpec struct {
@@ -94,6 +95,49 @@ func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T) {
 				t.Must.Equal(book.Get(t).Author, updateBook.Author)
 				t.Must.Equal(book.Get(t).Title, updateBook.Title)
 				t.Must.Equal(2020, updateBook.Edition)
+			})
+
+		})
+	})
+}
+
+func (b *BookShopSpec) RemoveBookFromTheStock(t *testcase.T) {
+	s := testcase.NewSpec(t)
+	s.Describe("deleting a book from the inventory", func(s *testcase.Spec) {
+		var (
+			book = testcase.Let(s, func(t *testcase.T) models.Book {
+				return models.Book{
+					Title: "The End of Everything",
+					Author: models.Author{
+						FirstName: "Darth",
+						LastName:  "Vador",
+					},
+					Edition: 2011,
+				}
+			})
+		)
+
+		act := func(t *testcase.T) error {
+			return b.shopper.Delete(book.Get(t))
+		}
+
+		s.When("the book is in the shop and is about to be sold out,", func(s *testcase.Spec) {
+			s.Before(func(t *testcase.T) {
+				id, err := b.shopper.Add(book.Get(t))
+				t.Must.NoError(err)
+
+				theBook, err := b.shopper.GetBookBy(id)
+				t.Must.NoError(err)
+
+				book.Set(t, theBook)
+			})
+
+			s.Then("it is deleted from the inventory.", func(t *testcase.T) {
+				err := act(t)
+				t.Must.NoError(err)
+
+				_, err = b.shopper.GetBookBy(book.Get(t).ID)
+				t.Must.NotNil(err)
 			})
 
 		})

@@ -9,6 +9,10 @@ type Service struct {
 	BookShop *models.BookShop
 }
 
+func (s *Service) Delete(book models.Book) error {
+	return s.BookShop.Stock.Delete(book)
+}
+
 func NewService(bookShop *models.BookShop) *Service {
 	return &Service{BookShop: bookShop}
 }
