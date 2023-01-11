@@ -12,11 +12,14 @@ func TestAddBookToShop(t *testing.T) {
 	s := testcase.NewSpec(t)
 	theBookShop := models.NewBookShop(make(models.Stock))
 	service := bookshop.NewService(theBookShop)
+
 	spec := specifications.NewBookShopSpec(service)
+
 	s.Describe("The Service", func(s *testcase.Spec) {
 		s.Test("adds a book", func(t *testcase.T) {
-			spec.AcquiringBookForTheBookshop(t)
+			spec.AddBookForTheStock(t)
 		})
+
 		s.Test("updates a book", func(t *testcase.T) {
 			spec.UpdateBookInTheStock(t)
 		})
@@ -25,5 +28,4 @@ func TestAddBookToShop(t *testing.T) {
 			spec.RemoveBookFromTheStock(t)
 		})
 	})
-
 }

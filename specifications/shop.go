@@ -21,7 +21,7 @@ func NewBookShopSpec(shopper Inventory) *BookShopSpec {
 	return &BookShopSpec{shopper: shopper}
 }
 
-func (b *BookShopSpec) AcquiringBookForTheBookshop(t *testcase.T) {
+func (b *BookShopSpec) AddBookForTheStock(t *testcase.T) {
 	s := testcase.NewSpec(t)
 	s.When("it adds a book to the bookshop inventory,", func(s *testcase.Spec) {
 		var (
