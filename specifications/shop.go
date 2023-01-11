@@ -21,22 +21,9 @@ func NewBookShopSpec(shopper Inventory) *BookShopSpec {
 	return &BookShopSpec{shopper: shopper}
 }
 
-func (b *BookShopSpec) AddBookForTheStock(t *testcase.T) {
+func (b *BookShopSpec) AddBookForTheStock(t *testcase.T, book testcase.Var[models.Book]) {
 	s := testcase.NewSpec(t)
 	s.When("it adds a book to the bookshop inventory,", func(s *testcase.Spec) {
-		var (
-			book = testcase.Let(s, func(t *testcase.T) models.Book {
-				return models.Book{
-					Title: "The End of Everything",
-					Author: models.Author{
-						FirstName: "Darth",
-						LastName:  "Vador",
-					},
-					Edition: 2011,
-				}
-			})
-		)
-
 		act := func(t *testcase.T) (uuid.UUID, error) {
 			return b.shopper.Add(book.Get(t))
 		}
@@ -55,22 +42,9 @@ func (b *BookShopSpec) AddBookForTheStock(t *testcase.T) {
 	})
 }
 
-func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T) {
+func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T, book testcase.Var[models.Book], newEdition int) {
 	s := testcase.NewSpec(t)
 	s.Describe("updating a book in the inventory", func(s *testcase.Spec) {
-		var (
-			book = testcase.Let(s, func(t *testcase.T) models.Book {
-				return models.Book{
-					Title: "The End of Everything",
-					Author: models.Author{
-						FirstName: "Darth",
-						LastName:  "Vador",
-					},
-					Edition: 2011,
-				}
-			})
-		)
-
 		act := func(t *testcase.T) (models.Book, error) {
 			return b.shopper.Update(book.Get(t))
 		}
@@ -83,7 +57,7 @@ func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T) {
 				theBook, err := b.shopper.GetBookBy(id)
 				t.Must.NoError(err)
 
-				theBook.Edition = 2020
+				theBook.Edition = newEdition
 
 				book.Set(t, theBook)
 			})
@@ -94,29 +68,16 @@ func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T) {
 
 				t.Must.Equal(book.Get(t).Author, updateBook.Author)
 				t.Must.Equal(book.Get(t).Title, updateBook.Title)
-				t.Must.Equal(2020, updateBook.Edition)
+				t.Must.Equal(newEdition, updateBook.Edition)
 			})
 
 		})
 	})
 }
 
-func (b *BookShopSpec) RemoveBookFromTheStock(t *testcase.T) {
+func (b *BookShopSpec) RemoveBookFromTheStock(t *testcase.T, book testcase.Var[models.Book]) {
 	s := testcase.NewSpec(t)
 	s.Describe("deleting a book from the inventory", func(s *testcase.Spec) {
-		var (
-			book = testcase.Let(s, func(t *testcase.T) models.Book {
-				return models.Book{
-					Title: "The End of Everything",
-					Author: models.Author{
-						FirstName: "Darth",
-						LastName:  "Vador",
-					},
-					Edition: 2011,
-				}
-			})
-		)
-
 		act := func(t *testcase.T) error {
 			return b.shopper.Delete(book.Get(t))
 		}

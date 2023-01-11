@@ -16,16 +16,28 @@ func TestAddBookToShop(t *testing.T) {
 	spec := specifications.NewBookShopSpec(service)
 
 	s.Describe("The Service", func(s *testcase.Spec) {
+		var (
+			book = testcase.Let(s, func(t *testcase.T) models.Book {
+				return models.Book{
+					Title: "The End of Everything",
+					Author: models.Author{
+						FirstName: "Darth",
+						LastName:  "Vador",
+					},
+					Edition: 2011,
+				}
+			})
+		)
 		s.Test("adds a book", func(t *testcase.T) {
-			spec.AddBookForTheStock(t)
+			spec.AddBookForTheStock(t, book)
 		})
 
 		s.Test("updates a book", func(t *testcase.T) {
-			spec.UpdateBookInTheStock(t)
+			spec.UpdateBookInTheStock(t, book, 2022)
 		})
 
 		s.Test("deletes a book", func(t *testcase.T) {
-			spec.RemoveBookFromTheStock(t)
+			spec.RemoveBookFromTheStock(t, book)
 		})
 	})
 }

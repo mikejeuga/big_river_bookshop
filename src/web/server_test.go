@@ -26,8 +26,8 @@ func TestServer(t *testing.T) {
 		server.Handler.ServeHTTP(res, req)
 	}
 
-	s.Describe("The server is running well", func(s *testcase.Spec) {
-		s.Test("Healthy Prob on Home", func(t *testcase.T) {
+	s.Describe("the server is", func(s *testcase.Spec) {
+		s.Test("healthy on '/'", func(t *testcase.T) {
 			act(t)
 			t.Must.Equal(http.StatusOK, res.Code)
 		})
