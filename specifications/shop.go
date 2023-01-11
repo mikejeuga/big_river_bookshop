@@ -6,53 +6,96 @@ import (
 	"github.com/mikejeuga/book_river_bookshop/models"
 )
 
-type Shop interface {
+type Inventory interface {
 	Add(book models.Book) (uuid.UUID, error)
-	GetBook(id uuid.UUID) (models.Book, error)
+	GetBookBy(id uuid.UUID) (models.Book, error)
+	Update(book models.Book) (models.Book, error)
 }
 
 type BookShopSpec struct {
-	shopper Shop
+	shopper Inventory
 }
 
-func NewBookShopSpec(shopper Shop) *BookShopSpec {
+func NewBookShopSpec(shopper Inventory) *BookShopSpec {
 	return &BookShopSpec{shopper: shopper}
 }
 
-func (b *BookShopSpec) GetBookInInventory(t *testcase.T) {
+func (b *BookShopSpec) AcquiringBookForTheBookshop(t *testcase.T) {
 	s := testcase.NewSpec(t)
-	s.Describe("The BookShop Behaviour", func(s *testcase.Spec) {
-
-		s.When("The BookShop adds a Book to its stock", func(s *testcase.Spec) {
-			var (
-				book = testcase.Let(s, func(t *testcase.T) models.Book {
-					return models.Book{
-						Title: "The End of Everything",
-						Author: models.Author{
-							FirstName: "Darth",
-							LastName:  "Vador",
-						},
-					}
-				})
-			)
-
-			act := func(t *testcase.T) (uuid.UUID, error) {
-				return b.shopper.Add(book.Get(t))
-			}
-
-			s.Then("The book is acquired and added to the stock", func(t *testcase.T) {
-				bookID, err := act(t)
-				t.Must.NoError(err)
-
-				gotBook, err := b.shopper.GetBook(bookID)
-				t.Must.NoError(err)
-
-				t.Must.Equal(book.Get(t).Author, gotBook.Author)
-				t.Must.Equal(book.Get(t).Title, gotBook.Title)
+	s.When("it adds a book to the bookshop inventory,", func(s *testcase.Spec) {
+		var (
+			book = testcase.Let(s, func(t *testcase.T) models.Book {
+				return models.Book{
+					Title: "The End of Everything",
+					Author: models.Author{
+						FirstName: "Darth",
+						LastName:  "Vador",
+					},
+					Edition: 2011,
+				}
 			})
+		)
 
+		act := func(t *testcase.T) (uuid.UUID, error) {
+			return b.shopper.Add(book.Get(t))
+		}
+
+		s.Then("the book is acquired and added to the inventory.", func(t *testcase.T) {
+			bookID, err := act(t)
+			t.Must.NoError(err)
+
+			gotBook, err := b.shopper.GetBookBy(bookID)
+			t.Must.NoError(err)
+
+			t.Must.Equal(book.Get(t).Author, gotBook.Author)
+			t.Must.Equal(book.Get(t).Title, gotBook.Title)
 		})
 
 	})
+}
 
+func (b *BookShopSpec) UpdateBookInTheStock(t *testcase.T) {
+	s := testcase.NewSpec(t)
+	s.Describe("updating a book in the inventory", func(s *testcase.Spec) {
+		var (
+			book = testcase.Let(s, func(t *testcase.T) models.Book {
+				return models.Book{
+					Title: "The End of Everything",
+					Author: models.Author{
+						FirstName: "Darth",
+						LastName:  "Vador",
+					},
+					Edition: 2011,
+				}
+			})
+		)
+
+		act := func(t *testcase.T) (models.Book, error) {
+			return b.shopper.Update(book.Get(t))
+		}
+
+		s.When("the book is in the shop and we need to update it,", func(s *testcase.Spec) {
+			s.Before(func(t *testcase.T) {
+				id, err := b.shopper.Add(book.Get(t))
+				t.Must.NoError(err)
+
+				theBook, err := b.shopper.GetBookBy(id)
+				t.Must.NoError(err)
+
+				theBook.Edition = 2020
+
+				book.Set(t, theBook)
+			})
+
+			s.Then("it is updated in the inventory.", func(t *testcase.T) {
+				updateBook, err := act(t)
+				t.Must.NoError(err)
+
+				t.Must.Equal(book.Get(t).Author, updateBook.Author)
+				t.Must.Equal(book.Get(t).Title, updateBook.Title)
+				t.Must.Equal(2020, updateBook.Edition)
+			})
+
+		})
+	})
 }
