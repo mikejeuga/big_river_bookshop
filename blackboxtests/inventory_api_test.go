@@ -1,7 +1,11 @@
+//+go:build acceptance
+
 package blackboxtests
 
 import (
+	"fmt"
 	"github.com/adamluzsi/testcase"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/mikejeuga/book_river_bookshop/blackboxtests/testclient"
 	"github.com/mikejeuga/book_river_bookshop/models"
 	"github.com/mikejeuga/book_river_bookshop/specifications"
@@ -11,8 +15,16 @@ import (
 func TestBookShopInventory(t *testing.T) {
 	s := testcase.NewSpec(t)
 
+	var testConfig testclient.Config
+	err := envconfig.Process("", &testConfig)
+	if err != nil {
+		t.Fatal("Could not load environment variables!")
+	}
+
+	fmt.Println(testConfig)
+
 	s.Describe("A Book Seller", func(s *testcase.Spec) {
-		testBookSeller := testclient.NewTestLibrarian("http://localhost:8004")
+		testBookSeller := testclient.NewTestLibrarian(testConfig)
 		spec := specifications.NewBookShopSpec(testBookSeller)
 
 		var (
@@ -29,7 +41,6 @@ func TestBookShopInventory(t *testing.T) {
 		)
 
 		s.Test("can add a book to the shop stock", func(t *testcase.T) {
-			t.Skip("Until server implemented")
 			spec.AddBookForTheStock(t, book)
 		})
 	})

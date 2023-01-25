@@ -15,34 +15,34 @@ func NewBookShop(stock Stock) *BookShop {
 
 type Stock map[uuid.UUID]Book
 
-func (stk Stock) Add(book Book) (uuid.UUID, error) {
+func (b BookShop) Add(book Book) (uuid.UUID, error) {
 	newBookID, err := uuid.NewUUID()
 	if err != nil {
 		return [16]byte{}, err
 	}
 	book.ID = newBookID
-	stk[book.ID] = book
+	b.Stock[book.ID] = book
 
 	return book.ID, nil
 }
 
-func (stk Stock) GetBookBy(bookID uuid.UUID) (Book, error) {
-	book, ok := stk[bookID]
+func (b BookShop) GetBookBy(bookID uuid.UUID) (Book, error) {
+	book, ok := b.Stock[bookID]
 	if !ok {
 		return Book{}, fmt.Errorf("this book does not exist in the inventory. bookID: %v", bookID)
 	}
 	return book, nil
 }
 
-func (stk Stock) Update(book Book) (Book, error) {
-	stk[book.ID] = book
-	return stk[book.ID], nil
+func (b BookShop) Update(book Book) (Book, error) {
+	b.Stock[book.ID] = book
+	return b.Stock[book.ID], nil
 }
 
-func (stk Stock) Delete(book Book) error {
-	book, ok := stk[book.ID]
+func (b BookShop) Delete(book Book) error {
+	book, ok := b.Stock[book.ID]
 	if ok {
-		delete(stk, book.ID)
+		delete(b.Stock, book.ID)
 		return nil
 	}
 	return fmt.Errorf("there is no unit of this book in the stock, %v", book)

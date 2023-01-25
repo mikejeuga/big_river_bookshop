@@ -20,13 +20,11 @@ test:
 
 ut: unit-test
 unit-test:
-	@go test -v -tags=unit ./...
+	@go test -v ./src/...
 
 at: acceptance-test
 acceptance-test:
-	@#docker-compose -f docker-compose.yml up -d
-	@go test -v -tags=acceptance ./...
-	@#docker-compose down
+	@go test -v -tags=acceptance ./blackboxtests/...
 
 ic: init
 init:
